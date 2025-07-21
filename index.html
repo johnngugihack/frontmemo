@@ -397,18 +397,13 @@ loginButton.style.color = "#003366";
     loginButton.textContent = "Login";
   }
 });
- if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').then(
-      (registration) => {
-        console.log('✅ ServiceWorker registered: ', registration);
-      },
-      (err) => {
-        console.warn('❌ ServiceWorker registration failed: ', err);
-      }
-    );
-  });
-}
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('✅ Service Worker registered', reg))
+        .catch(err => console.warn('❌ Service Worker registration failed', err));
+    });
+  }
 
   </script>
 </body>
