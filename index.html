@@ -397,7 +397,11 @@ loginButton.style.color = "#003366";
     loginButton.textContent = "Login";
   }
 });
-
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log("✅ Service Worker registered"))
+      .catch(err => console.error("❌ SW registration failed:", err));
+  }
   </script>
 </body>
 </html>
