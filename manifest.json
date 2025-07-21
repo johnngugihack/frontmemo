@@ -1,21 +1,25 @@
 {
-  "name": "Memo Upload App",
+  "name": "MemoTrial",
   "short_name": "MemoApp",
   "start_url": "index.html",
+  "id": "/",
   "display": "standalone",
-  "background_color": "#1e1e2f",
-  "theme_color": "#1e1e2f",
-  "description": "Upload and manage internal memos easily.",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "description": "Secure memo login app",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
-      "src": "logo.png",
+      "src": "logo.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "logo.png",
+      "src": "logo.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }
