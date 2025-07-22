@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <title>Memo Viewer</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-<link rel="manifest" href="manifest.json" />
-
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -507,7 +505,7 @@ button:disabled {
 
   <button onclick="loadMemosforsidebar('Director')">Memos To Director</button>
 
-  <button onclick="loadMemosforsidebar('Human Resource')">Memos To HR</button>
+  <button onclick="loadMemosforsidebar('Hr')">Memos To HR</button>
 
   <button onclick="loadMemosforsidebar('Commercial')">Memos To Commercial</button>
   <button onclick="loadMemosforsidebar('Accounts')">Memos To Accounts</button>
@@ -530,6 +528,16 @@ button:disabled {
   </div>
 </div>
 
+<div id="commentModal" style="display: none; position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%);
+ background: white; padding: 20px; border-radius: 10px; z-index: 999; color: black; max-width: 90%; width: 700px;">
+  <label for="commentInput">Enter your comment:</label><br>
+  <textarea id="commentInput" rows="4" style="width: 100%; margin-top: 10px;"></textarea><br><br>
+ <button onclick="submitComment(event)">Submit</button>
+
+  <button onclick="closeModall()">Cancel</button>
+</div>
+
+
 
   <form id="memoForm" enctype="multipart/form-data">
     <h2 style="width: 95%;  margin-left:-15px; border-radius: 10px;">TRACK YOUR MEMOS</h2>
@@ -546,7 +554,7 @@ button:disabled {
 <select id="destinationSelect" class="styled-select">
   <option value="" disabled selected>Select the path of the memo ...</option>
   <option value="Director">Director</option>
-  <option value="Human Resource">Human Resources</option>
+  <option value="Hr">Human Resources</option>
   <option value="Commercial">Commercial</option>
   <option value="Accounts">Accounts</option>
   <option value="ICT">ICT</option>
@@ -561,7 +569,7 @@ button:disabled {
 </select>
 
 
-    <input type="file" name="memo" accept="image/*" capture="environment" class="image" required />
+    <input type="file" id="fileInput" name="memo" accept="image/*" class="image" required />
     <button type="submit" id="uploadBtn" style="font-size:50px"><b>UPLOAD</b></button>
   </form>
 <div id="uploadStatus" style="margin-top: 10px;"></div>
@@ -587,7 +595,15 @@ button:disabled {
 
  <script>
 const role = localStorage.getItem('role');
+  const fileInput = document.getElementById('fileInput');
 
+  fileInput.addEventListener('change', function () {
+    if (this.files.length === 0) {
+      // Reset input so it can be triggered again
+      const newInput = this.cloneNode(true);
+      this.replaceWith(newInput);
+    }
+  });
 // Only redirect if role is truly missing
 if (!role) {
   window.location.href = 'index.html'; // adjust path if needed
@@ -1158,47 +1174,64 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function closeModall() {
+  document.getElementById('commentModal').style.display = 'none';
+  document.getElementById('commentInput').value = '';
+}
 
-async function approveMemo(memoId, role) {
-  const button = event.target;
-  const originalText = button.textContent;
 
-  // Prompt user for comment
-  const comment = prompt("Enter your comment for this memo approval:");
+let currentMemoId = null;
+let currentRole = null;
 
-  // If user cancels or leaves it blank, you can decide whether to proceed or not
-  if (comment === null) {
-    // User clicked Cancel
+function approveMemo(memoId, role) {
+  currentMemoId = memoId;
+  currentRole = role;
+  document.getElementById('commentModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('commentModal').style.display = 'none';
+  document.getElementById('commentInput').value = '';
+}
+
+async function submitComment(event) {
+  const comment = document.getElementById('commentInput').value.trim();
+  const submitBtn = event.target;
+  const originalText = submitBtn.textContent;
+
+  if (!comment) {
+    alert("Please enter a comment.");
     return;
   }
 
-  button.textContent = 'Approving...';
-  button.disabled = true;
-  button.style.backgroundColor = 'orange';
-  button.style.color = 'yellow';
+  submitBtn.textContent = 'Submitting...';
+  submitBtn.disabled = true;
 
   try {
     const res = await fetch('https://memo-locator-production.up.railway.app/approve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ memo_id: memoId, role, comment })
+      body: JSON.stringify({
+        memo_id: currentMemoId,
+        role: currentRole,
+        comment: comment
+      })
     });
-
+closeModall();
     const data = await res.json();
     if (res.ok) {
       alert(`✅ ${data.message}`);
       await loadMemos();
+      closeModall(); // ✅ This closes the modal after success
     } else {
       alert(`❌ ${data.detail || data.error || 'Approval failed'}`);
     }
   } catch (error) {
     console.error('Approval request failed', error);
-    alert('❌ Approval request failed. Check network or contact support.');
+    alert('❌ Network or server error');
   } finally {
-    button.textContent = originalText;
-    button.disabled = false;
-    button.style.backgroundColor = '';
-    button.style.color = '';
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
   }
 }
 
@@ -1416,13 +1449,7 @@ if (role && roleInput) {
   }
 });
 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log('✅ Service Worker registered', reg))
-        .catch(err => console.warn('❌ Service Worker registration failed', err));
-    });
-  }
+
  
   setInterval(loadMemosIfChanged, 2000);
   loadMemos();
