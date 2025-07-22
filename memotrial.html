@@ -963,14 +963,14 @@ function renderComment(comments) {
   let visibleComments = Object.entries(comments)
     .filter(([_, comment]) => comment && comment.trim() !== '')
     .map(([dept, comment]) => {
-      return `<p><strong>${dept.toUpperCase()}:</strong> ${comment}</p>`;
+      return `<p style="font-size: 28px;"><strong>${dept.toUpperCase()}:</strong> ${comment}</p>`;
     });
 
   if (visibleComments.length === 0) return '';
 
   return `
     <div class="comment-box" style="margin-top:10px; padding:10px; background:#f9f9f9; color:black; border-left:4px solid #007BFF; border-radius:5px;">
-      <strong>Comments:</strong>
+      <strong style="font-size: 25px;">Comments:</strong>
       ${visibleComments.join('')}
     </div>
   `;
