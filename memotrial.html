@@ -348,7 +348,7 @@ border: 5px solid;
       color: #fff;
       padding-top: 60px;
      
-       z-index: 1000;
+       z-index: 2000;
        opacity: 0;
       transition: left 1s ease-in-out, opacity 1s ease-in-out;
       
@@ -529,7 +529,7 @@ button:disabled {
 </div>
 
 <div id="commentModal" style="display: none; position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%);
- background: white; padding: 20px; border-radius: 10px; z-index: 999; color: black; max-width: 90%; width: 700px;">
+ background: white; padding: 20px; border-radius: 10px; z-index: 20000; color: black; max-width: 90%; width: 700px;">
   <label for="commentInput">Enter your comment:</label><br>
   <textarea id="commentInput" rows="4" style="width: 100%; margin-top: 10px;"></textarea><br><br>
  <button onclick="submitComment(event)">Submit</button>
@@ -1458,4 +1458,3 @@ if (role && roleInput) {
 
 </body>
 </html>
-
