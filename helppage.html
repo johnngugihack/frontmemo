@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help & Support</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to top, rgba(0,0,0,0.6)50%, rgba(0,0,0,0.6)50%), url(3.jpg);
+      background-size: cover;
+      background-position: center;
+      color: white;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 30px 50px;
+      background: linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.4));
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 0 0 10px 10px;
+      border: 1px solid gray;
+    }
+
+    .header-logo {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      border: 1px solid gray;
+    }
+
+    .header-text {
+      text-align: right;
+      color: #f0f0f0;
+    }
+
+    .header-title {
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    .header-subtitle {
+      font-size: 16px;
+      color: #ccc;
+      margin-top: 5px;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 90%;
+      margin: auto;
+      padding: 60px 40px;
+      background-color: rgba(0,0,0,0.5);
+      border: 3px solid gray;
+      backdrop-filter: blur(6px);
+      border-radius: 8px;
+      margin-top: 20px;
+      margin-bottom: 20px;
+      min-height: 78%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2rem;
+    }
+
+    h2 {
+      margin-top: 30px;
+      font-size: 1.5rem;
+      color: #ccc;
+    }
+
+    p, li {
+      font-size: 1rem;
+      margin-top: 10px;
+      color: #eee;
+      line-height: 1.5;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .contact-form {
+      margin-top: 30px;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 16px;
+    }
+
+    .contact-form textarea {
+      resize: vertical;
+    }
+
+    .contact-form button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .contact-form button:hover {
+      background: white;
+      color: black;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px 15px;
+      font-size: 14px;
+      background-color: rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      border: 1px solid gray;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 800px;
+    }
+
+    footer a {
+      color: #ccc;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Responsive Enhancements */
+    @media (max-width: 768px) {
+      .container {
+        padding: 30px 20px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      p, li {
+        font-size: 0.95rem;
+      }
+
+      .contact-form input,
+      .contact-form textarea {
+        font-size: 15px;
+      }
+
+      .contact-form button {
+        font-size: 16px;
+      }
+
+      footer {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 20px 15px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      p, li {
+        font-size: 0.9rem;
+      }
+
+      .contact-form input,
+      .contact-form textarea {
+        font-size: 14px;
+        padding: 10px;
+      }
+
+      .contact-form button {
+        font-size: 15px;
+        padding: 10px;
+      }
+
+      footer {
+        padding: 20px 10px;
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <img src="logo.jpg" alt="Logo" class="header-logo" />
+      <div class="header-text">
+        <div class="header-title">What Is The Issue🤗🤗</div>
+        <div class="header-subtitle">Talk To Me</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <h1>Help & Support</h1>
+
+      <h2>Contact Us</h2>
+      <p>If you're facing issues, feel free to reach out. We’ll respond as soon as possible.</p>
+
+      <div class="contact-form">
+        <input type="text" placeholder="Your Name" required />
+        <input type="email" placeholder="Your Email" required />
+        <textarea rows="4" placeholder="Describe your issue..." required></textarea>
+        <button>Send Message</button>
+      </div>
+
+      <h2>Frequently Asked Questions</h2>
+      <ul>
+        <li><strong>Can't log in?</strong><br>Ensure your username and password are correct. Still stuck? Contact support.</li>
+        <li><strong>Need access?</strong><br>Only registered users can log in. Ask your admin to create an account.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 JohnNgugi. All rights reserved.</p>
+    <p>
+      <a href="index.html">Back to Login</a> |
+      <a href="#">Privacy Policy</a> |
+      <a href="#">Terms</a>
+    </p>
+  </footer>
+</body>
+</html>
