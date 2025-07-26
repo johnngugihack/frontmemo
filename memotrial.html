@@ -1267,7 +1267,7 @@ function filterMemosByDepartment(dept) {
 
   async function loadMemosIfChanged() {
     try {
-      const res = await fetch('http://192.168.1.7:5000/view');
+      const res = await fetch('https://memo-locator-production.up.railway.app/view');
       const data = await res.json();
       const newHash = JSON.stringify(data.data.map(m => m.id + m.approval_status.join(',')));
 
