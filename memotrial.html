@@ -1319,7 +1319,7 @@ window.onload = () => {
 
 async function loadMemosforsidebar(destination) {
   try {
-    const res = await fetch('http://192.168.1.7:5000/view');
+    const res = await fetch('https://memo-locator-production.up.railway.app/view');
     const data = await res.json();
     if (!res.ok) throw new Error('Failed to fetch memos');
 
