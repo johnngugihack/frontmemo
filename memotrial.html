@@ -529,9 +529,9 @@ button:disabled {
 </div>
 
 <div id="commentModal" style="display: none; position: fixed; top: 30%; left: 50%; transform: translate(-50%, -30%);
- background: white; padding: 20px; border-radius: 10px; z-index: 20000; font-size: 30px; color: black; max-width: 90%; width: 700px;">
+ background: white; padding: 20px; border-radius: 10px; z-index: 20000; color: black; max-width: 90%; width: 700px;">
   <label for="commentInput">Enter your comment:</label><br>
-  <b><textarea id="commentInput" rows="4" style="width: 100%; margin-top: 10px; font-size: 40px;"></textarea></b><br><br>
+  <textarea id="commentInput" rows="4" style="width: 100%; margin-top: 10px;"></textarea><br><br>
  <button onclick="submitComment(event)">Submit</button>
 
   <button onclick="closeModall()">Cancel</button>
@@ -542,9 +542,7 @@ button:disabled {
   <form id="memoForm" enctype="multipart/form-data">
     <h2 style="width: 95%;  margin-left:-15px; border-radius: 10px;">TRACK YOUR MEMOS</h2>
     <input  type="text" name="person" placeholder="Submitted by..." class="personin" required />
-    <input  type="email" name="email" placeholder="Enter your email..." class="personin" required />
- <input  type="text" name="department" placeholder="Enter your department..." class="personin" required />
-
+    
 
 
 <!-- Display selected departments as tags -->
@@ -594,19 +592,30 @@ button:disabled {
   </section>
 
  <script>
-const role = localStorage.getItem('role');
-  const fileInput = document.getElementById('fileInput');
+function getRoleFromToken(token) {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.role; // adjust if role is nested
+  } catch (e) {
+    return null;
+  }
+}
 
-  fileInput.addEventListener('change', function () {
-    if (this.files.length === 0) {
-      // Reset input so it can be triggered again
-      const newInput = this.cloneNode(true);
-      this.replaceWith(newInput);
-    }
-  });
-// Only redirect if role is truly missing
+const token = sessionStorage.getItem('token');
+const role = token ? getRoleFromToken(token) : null;
+
+const fileInput = document.getElementById('fileInput');
+
+fileInput.addEventListener('change', function () {
+  if (this.files.length === 0) {
+    const newInput = this.cloneNode(true);
+    this.replaceWith(newInput);
+  }
+});
+
+// ✅ Redirect if no valid role found
 if (!role) {
-  window.location.href = 'index.html'; // adjust path if needed
+  window.location.href = 'index.html';
 }
 
   const menuToggle = document.getElementById('menuToggle');
@@ -706,159 +715,122 @@ document.addEventListener('click', (event) => {
   const responseBox = document.getElementById('response');
   const button = document.getElementById("uploadBtn");
   const statusDiv = document.getElementById("uploadStatus");
-
+  const hiddenPathInput = document.getElementById("approvalPathInput");
+  
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
     const formData = new FormData(form);
-      button.disabled = false;
+    const token = sessionStorage.getItem("token");
+
+    if (!token) {
+      responseBox.textContent = "❌ You are not logged in.";
+      responseBox.style.color = 'red';
+      return;
+    }
+
+    // Show uploading UI
+    button.disabled = true;
     button.innerHTML = `<span class="spinner" style="margin-right: 8px;"></span> <span style="color: yellow;">Uploading...</span>`;
-
-    statusDiv.innerHTML = `<span style="color: yellow; font-size:35px;">Please wait while we upload your file...</span>`;
-
-
+    statusDiv.innerHTML = `<span style="color: yellow; font-size: 35px;">Please wait while we upload your file...</span>`;
 
     try {
       const res = await fetch('https://memo-locator-production.up.railway.app/upload', {
         method: 'POST',
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
         body: formData
       });
+
       const data = await res.json();
 
       if (res.ok) {
-	responseBox.textContent = `✅ ${data.message}`;
-	responseBox.style.color = 'green';
-        
-        clearTags();
+        // ✅ Upload succeeded
+        responseBox.textContent = `✅ ${data.message}`;
+        responseBox.style.color = 'green';
 
-       updateHiddenInput();
-       form.reset();
-   
-   // Refill "Submitted by" with saved username
- const savedUsername = localStorage.getItem("username");
- const savedEmail = localStorage.getItem("email");
- const savedRole = localStorage.getItem("role");
+	clearTags();                      // 👈 Clear DOM tags first
+	hiddenPathInput.value = "";      // 👈 Clear the hidden input
+	selectedDepartments = [];        // 👈 Optional, if you're using this variable
+       
+        form.reset();
+       
+        // Re-set the 'person' input field with username from token
+        const decoded = parseJwt(token);
+        if (decoded && decoded.sub) {
+          const personInput = document.querySelector('input[name="person"]');
+          if (personInput) {
+            personInput.value = decoded.sub;
+            personInput.style.color = "yellow";
+            personInput.readOnly = true;
+          }
+        }
 
-if (savedUsername) {
-  const personInput = form.querySelector('input[name="person"]');
-  if (personInput) {
-    personInput.value = savedUsername;
-    personInput.style.color = "yellow";
-    personInput.readOnly = true;
-  }
-}
+        // Reset button and status UI
+        button.innerHTML = "UPLOAD";
+        button.style.color = "black";
+        button.style.fontWeight = "bold";
+        button.disabled = false;
+        statusDiv.textContent = "";
 
-if (savedEmail) {
-  const emailInput = form.querySelector('input[name="email"]');
-  if (emailInput) {
-    emailInput.value = savedEmail;
-    emailInput.style.color = "yellow";
-    emailInput.readOnly = true;
-  }
-}
-if (savedRole) {
-  const roleInput = form.querySelector('input[name="department"]');
-  if (roleInput) {
-    roleInput.value = savedRole.toUpperCase();
-    roleInput.style.color = "yellow";
-    roleInput.readOnly = true;
-  }
-}
+        // Fade out success message
+        setTimeout(() => {
+          responseBox.style.opacity = '0';
+          setTimeout(() => responseBox.textContent = '', 500);
+          responseBox.style.opacity = '1';
+        }, 4000);
 
-    button.innerHTML = "UPLOAD";
-    statusDiv.textContent = "";  // ✅ Clear status
-	
-	
-	// Remove the message after 3 seconds
-        
-	setTimeout(() => {
-  responseBox.style.opacity = '0';
-  setTimeout(() => responseBox.textContent = '', 500); // clear after fade
-  responseBox.style.opacity = '1'; // reset for next use
-}, 4000);
-
-        
       } else {
-        responseBox.textContent = `❌ Error: ${data.error}`;
-        responseBox.style.color = 'red';
-     button.disabled = false;
-    button.innerHTML = "UPLOAD";
-    statusDiv.textContent = "";  // ✅ Clear status
-  form.reset();
-
-  
-   // Re-fill fields from localStorage
- const savedUsername = localStorage.getItem("username");
- const savedEmail = localStorage.getItem("email");
- const savedRole = localStorage.getItem("role");
-
-if (savedUsername) {
-  const personInput = form.querySelector('input[name="person"]');
-  if (personInput) {
-    personInput.value = savedUsername;
-    personInput.style.color = "yellow";
-    personInput.readOnly = true;
-  }
-}
-
-if (savedEmail) {
-  const emailInput = form.querySelector('input[name="email"]');
-  if (emailInput) {
-    emailInput.value = savedEmail;
-    emailInput.style.color = "yellow";
-    emailInput.readOnly = true;
-  }
-}
-if (savedRole) {
-  const roleInput = form.querySelector('input[name="department"]');
-  if (roleInput) {
-    roleInput.value = savedRole.toUpperCase();
-    roleInput.style.color = "yellow";
-    roleInput.readOnly = true;
-  }
-}
-
+        // ❌ Error from server
+        handleUploadError(data.detail || data.error || 'Upload failed.');
       }
+
     } catch (err) {
       console.error(err);
-      responseBox.textContent = '❌ Failed to upload memo.';
-      responseBox.style.color = 'red';
-      button.disabled = false;
+      handleUploadError('❌ Failed to upload memo.');
+    }
+  });
+
+  function handleUploadError(msg) {
+    responseBox.textContent = msg;
+    responseBox.style.color = 'red';
+    button.disabled = false;
     button.innerHTML = "UPLOAD";
-    statusDiv.textContent = "";  // ✅ Clear status
-      form.reset();
-
-  // Re-fill "Submitted by" field from localStorage
-const savedUsername = localStorage.getItem("username");
- const savedEmail = localStorage.getItem("email");
- const savedRole = localStorage.getItem("role");
-
-if (savedUsername) {
-  const personInput = form.querySelector('input[name="person"]');
-  if (personInput) {
-    personInput.value = savedUsername;
-    personInput.style.color = "yellow";
-    personInput.readOnly = true;
+    button.style.color = "black";
+    button.style.fontWeight = "bold";
+    statusDiv.textContent = "";
+    form.reset(); // Still reset the form on failure
   }
-}
 
-if (savedEmail) {
-  const emailInput = form.querySelector('input[name="email"]');
-  if (emailInput) {
-    emailInput.value = savedEmail;
-    emailInput.style.color = "yellow";
-    emailInput.readOnly = true;
+  function clearTags() {
+    const tagContainer = document.getElementById("tagContainer");
+    if (tagContainer) tagContainer.innerHTML = "";
   }
-}
-if (savedRole) {
-  const roleInput = form.querySelector('input[name="department"]');
-  if (roleInput) {
-    roleInput.value = savedRole.toUpperCase();
-    roleInput.style.color = "yellow";
-    roleInput.readOnly = true;
-  }
-}
 
+ 
+  function parseJwt(token) {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Populate 'person' input on page load
+  window.addEventListener("DOMContentLoaded", () => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded && decoded.sub) {
+        const personInput = document.querySelector('input[name="person"]');
+        if (personInput) {
+          personInput.value = decoded.sub;
+          personInput.style.color = "yellow";
+          personInput.readOnly = true;
+        }
+      }
     }
   });
 
@@ -915,10 +887,26 @@ finally {
 
 
 
+function getRoleFromToken() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return null;
+
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payloadJson = atob(payloadBase64); // Decode base64
+    const payload = JSON.parse(payloadJson);
+    return payload.role?.toLowerCase() || null;
+  } catch (e) {
+    console.error("Failed to decode token:", e);
+    return null;
+  }
+}
 
 
 function generateApprovalButtons(memo) {
-  const role = localStorage.getItem('role')?.toLowerCase();
+  const role = getRoleFromToken();
+
+  if (!role) return;
 
   // Properly parse the destination JSON string
   let destinations = [];
@@ -1008,7 +996,8 @@ async function loadMemos() {
 
       // Button
       const button = document.createElement('button');
-      button.textContent = dept;
+      button.textContent = dept.toUpperCase();
+
       button.className = 'filter-button';
       button.setAttribute('data-department', dept);
       button.style.fontSize = '2rem';
@@ -1038,7 +1027,7 @@ async function loadMemos() {
       deptDiv.id = `dept-${dept}`;
 
       const title = document.createElement('h2');
-      title.textContent = 'From ' + dept + ' Department';
+      title.textContent = 'From ' + dept.toUpperCase() + ' Department';
       deptDiv.appendChild(title);
 
       memos.forEach(memo => {
@@ -1278,7 +1267,7 @@ function filterMemosByDepartment(dept) {
 
   async function loadMemosIfChanged() {
     try {
-      const res = await fetch('https://memo-locator-production.up.railway.app/view');
+      const res = await fetch('http://192.168.1.7:5000/view');
       const data = await res.json();
       const newHash = JSON.stringify(data.data.map(m => m.id + m.approval_status.join(',')));
 
@@ -1330,7 +1319,7 @@ window.onload = () => {
 
 async function loadMemosforsidebar(destination) {
   try {
-    const res = await fetch('https://memo-locator-production.up.railway.app/view');
+    const res = await fetch('http://192.168.1.7:5000/view');
     const data = await res.json();
     if (!res.ok) throw new Error('Failed to fetch memos');
 
@@ -1422,32 +1411,40 @@ function closeModal() {
   document.getElementById('popupModal').style.display = 'none';
 }
 
-//Getting the name entered in the text field of the person who logged in
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64).split('').map(c =>
+        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+      ).join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error("Failed to parse JWT:", e);
+    return null;
+  }
+}
+
 window.addEventListener("DOMContentLoaded", () => {
-  const username = localStorage.getItem("username");
-  const email = localStorage.getItem("email");
-  const role = localStorage.getItem("role");
+  const token = sessionStorage.getItem("token"); // or however you store it
 
-  const personInput = document.querySelector('#memoForm input[name="person"]');
-  const emailInput = document.querySelector('#memoForm input[name="email"]');
-   const roleInput = document.querySelector('#memoForm input[name="department"]');
+  if (token) {
+    const decoded = parseJwt(token);
+    if (decoded && decoded.sub) {
+      const username = decoded.sub;
 
-  if (username && personInput) {
-    personInput.value = username;
-    personInput.style.color = "yellow";  // ✅ Yellow for visibility
-    personInput.readOnly = true;         // ✅ Prevent editing
-  }
-if (role && roleInput) {
-   roleInput.value = role.toUpperCase(); 
-    roleInput.style.color = "yellow";  // ✅ Yellow for visibility
-    roleInput.readOnly = true;         // ✅ Prevent editing
-  }
-  if (email && emailInput) {
-    emailInput.value = email;
-    emailInput.style.color = "yellow";   // ✅ Match style
-    emailInput.readOnly = true;          // ✅ Optional
+      const personInput = document.querySelector('input[name="person"]');
+      if (personInput) {
+        personInput.value = username;
+        personInput.style.color = "yellow";
+        personInput.readOnly = true;
+      }
+    }
   }
 });
+
 
 
  
