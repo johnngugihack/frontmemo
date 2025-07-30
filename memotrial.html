@@ -759,10 +759,10 @@ document.addEventListener('click', (event) => {
        
         // Re-set the 'person' input field with username from token
         const decoded = parseJwt(token);
-        if (decoded && decoded.sub) {
+        if (decoded && decoded.role) {
           const personInput = document.querySelector('input[name="person"]');
           if (personInput) {
-            personInput.value = decoded.sub;
+            personInput.value = decoded.role;
             personInput.style.color = "yellow";
             personInput.readOnly = true;
           }
@@ -823,10 +823,10 @@ document.addEventListener('click', (event) => {
     const token = sessionStorage.getItem("token");
     if (token) {
       const decoded = parseJwt(token);
-      if (decoded && decoded.sub) {
+      if (decoded && decoded.role) {
         const personInput = document.querySelector('input[name="person"]');
         if (personInput) {
-          personInput.value = decoded.sub;
+          personInput.value = decoded.role;
           personInput.style.color = "yellow";
           personInput.readOnly = true;
         }
@@ -918,10 +918,10 @@ function getVoteFromToken() {
 
 
 function generateApprovalButtons(memo) {
-  const role = getRoleFromToken();     // from sessionStorage
-  const vote = getVoteFromToken();     // from sessionStorage
+  const role = getRoleFromToken();
+  const vote = getVoteFromToken();
 
-  if (!role) return ''; // No role found, skip rendering
+  if (!role || vote !== 1) return ''; // ⛔️ Don't show anything if not allowed to vote
 
   let destinations = [];
   try {
@@ -934,22 +934,15 @@ function generateApprovalButtons(memo) {
 
   function createBox(dept) {
     const userIsInDept = role === dept;
-    const canAct = userIsInDept && vote === 1;
-
-    if (!userIsInDept) return '';  // Only show boxes for the user's role
+    if (!userIsInDept) return ''; // ⛔️ Only show button for the logged-in role
 
     return `
       <div class="approval-box">
-        <div class="box-title" style="font-size: 1.2rem; font-weight: bold;">
-          ${capitalize(dept)} Approval
-        </div>
-        <button onclick="approveMemo(${memo.id}, '${dept}')" ${canAct ? '' : 'disabled'}
-          style="font-size: 15px; font-weight: bold;">
+        <div class="box-title" style="font-size: 1.2rem; font-weight: bold;">${capitalize(dept)} Approval</div>
+        <button onclick="approveMemo(${memo.id}, '${dept}')" style="font-size: 18px; font-weight: bold;">
           ${capitalize(dept)} Approve
         </button>
-        <button class="reject-btn" onclick="rejectMemo(${memo.id}, '${dept}')"
-          ${canAct ? '' : 'disabled'}
-          style="font-size: 15px; font-weight: bold; padding: 10px 16px;">
+        <button class="reject-btn" onclick="rejectMemo(${memo.id}, '${dept}')" style="font-size: 18px; font-weight: bold; padding: 10px 16px;">
           ${capitalize(dept)} Decline
         </button>
       </div>
@@ -1456,8 +1449,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (token) {
     const decoded = parseJwt(token);
-    if (decoded && decoded.sub) {
-      const username = decoded.sub;
+    if (decoded && decoded.role) {
+      const username = decoded.role;
 
       const personInput = document.querySelector('input[name="person"]');
       if (personInput) {
