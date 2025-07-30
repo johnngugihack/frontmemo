@@ -759,10 +759,10 @@ document.addEventListener('click', (event) => {
        
         // Re-set the 'person' input field with username from token
         const decoded = parseJwt(token);
-        if (decoded && decoded.role) {
+        if (decoded && decoded.sub) {
           const personInput = document.querySelector('input[name="person"]');
           if (personInput) {
-            personInput.value = decoded.role;
+            personInput.value = decoded.sub;
             personInput.style.color = "yellow";
             personInput.readOnly = true;
           }
@@ -823,10 +823,10 @@ document.addEventListener('click', (event) => {
     const token = sessionStorage.getItem("token");
     if (token) {
       const decoded = parseJwt(token);
-      if (decoded && decoded.role) {
+      if (decoded && decoded.sub) {
         const personInput = document.querySelector('input[name="person"]');
         if (personInput) {
-          personInput.value = decoded.role;
+          personInput.value = decoded.sub;
           personInput.style.color = "yellow";
           personInput.readOnly = true;
         }
@@ -1449,8 +1449,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (token) {
     const decoded = parseJwt(token);
-    if (decoded && decoded.role) {
-      const username = decoded.role;
+    if (decoded && decoded.sub) {
+      const username = decoded.sub;
 
       const personInput = document.querySelector('input[name="person"]');
       if (personInput) {
