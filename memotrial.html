@@ -901,14 +901,28 @@ function getRoleFromToken() {
     return null;
   }
 }
+function getVoteFromToken() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return null;
+
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payloadJson = atob(payloadBase64); // Decode base64
+    const payload = JSON.parse(payloadJson);
+    return payload.vote ?? null; // could be 0 or 1
+  } catch (e) {
+    console.error("Failed to decode token:", e);
+    return null;
+  }
+}
 
 
 function generateApprovalButtons(memo) {
-  const role = getRoleFromToken();
+  const role = getRoleFromToken();     // from sessionStorage
+  const vote = getVoteFromToken();     // from sessionStorage
 
-  if (!role) return;
+  if (!role) return ''; // No role found, skip rendering
 
-  // Properly parse the destination JSON string
   let destinations = [];
   try {
     destinations = JSON.parse(memo.destination || '[]').map(d => d.toLowerCase());
@@ -919,16 +933,25 @@ function generateApprovalButtons(memo) {
   let buttonsHTML = '';
 
   function createBox(dept) {
-    const isActive = role === dept;
+    const userIsInDept = role === dept;
+    const canAct = userIsInDept && vote === 1;
+
+    if (!userIsInDept) return '';  // Only show boxes for the user's role
+
     return `
       <div class="approval-box">
-        <div class="box-title">${capitalize(dept)} Approval</div>
-        <button onclick="approveMemo(${memo.id}, '${dept}')" ${isActive ? '' : 'disabled'}>
+        <div class="box-title" style="font-size: 1.2rem; font-weight: bold;">
+          ${capitalize(dept)} Approval
+        </div>
+        <button onclick="approveMemo(${memo.id}, '${dept}')" ${canAct ? '' : 'disabled'}
+          style="font-size: 15px; font-weight: bold;">
           ${capitalize(dept)} Approve
         </button>
-        ${isActive ? `<button class="reject-btn" onclick="rejectMemo(${memo.id}, '${dept}')">
+        <button class="reject-btn" onclick="rejectMemo(${memo.id}, '${dept}')"
+          ${canAct ? '' : 'disabled'}
+          style="font-size: 15px; font-weight: bold; padding: 10px 16px;">
           ${capitalize(dept)} Decline
-        </button>` : ''}
+        </button>
       </div>
     `;
   }
@@ -939,6 +962,7 @@ function generateApprovalButtons(memo) {
 
   return `<div class="scroll-wrapper"><div class="button-container">${buttonsHTML}</div></div>`;
 }
+
 
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
