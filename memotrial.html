@@ -939,10 +939,10 @@ function generateApprovalButtons(memo) {
     return `
       <div class="approval-box">
         <div class="box-title" style="font-size: 1.2rem; font-weight: bold;">${capitalize(dept)} Approval</div>
-        <button onclick="approveMemo(${memo.id}, '${dept}')" style="font-size: 18px; font-weight: bold;">
+        <button onclick="approveMemo(${memo.id}, '${dept}')" style="font-size: 20px; font-weight: bold;">
           ${capitalize(dept)} Approve
         </button>
-        <button class="reject-btn" onclick="rejectMemo(${memo.id}, '${dept}')" style="font-size: 18px; font-weight: bold; padding: 10px 16px;">
+        <button class="reject-btn" onclick="rejectMemo(${memo.id}, '${dept}')" style="font-size: 20px; font-weight: bold; padding: 10px 16px;">
           ${capitalize(dept)} Decline
         </button>
       </div>
