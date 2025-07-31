@@ -17,6 +17,45 @@
       background: #111;
       color: white;
     }
+.login-transition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1b1b1b, #222831);
+  color: #00ffd5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.login-transition.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.welcome-text {
+  font-size: 2.5rem;
+  font-weight: bold;
+  animation: popIn 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
     .container {
       display: flex;
@@ -306,6 +345,9 @@
         </div>
 
         <button type="submit" class="btnn">Login</button>
+  <div id="loginTransition" class="login-transition">
+  <div class="welcome-text" id="welcomeText">Welcome!</div>
+</div>
 
         <p id="error-message" style="color: red;"></p>
         <div id="sucess" style="color:rgb(47, 255, 54); font-size:20px; margin-top:20px;"></div>
@@ -352,7 +394,7 @@
   // 🔒 Disable button and show loading state
   loginButton.disabled = true;
   loginButton.textContent = "Logging in...";
-loginButton.style.color = "#003366";
+loginButton.style.color = "white";
 
 
   try {
@@ -365,16 +407,25 @@ loginButton.style.color = "#003366";
     const data = await response.json();
    
     
-    if (response.ok) {
-      successMessage.innerText = "Hello " + username?.toUpperCase() + ", Welcome!!!";
-     
-      sessionStorage.setItem("token", data.user.token);
+if (response.ok) {
+  const transition = document.getElementById("loginTransition");
+  const welcomeText = document.getElementById("welcomeText");
 
-      
-      setTimeout(() => {
-        window.location.href = "memotrial.html";
-      }, 2000);
-    } else {
+  // Customize welcome text
+  welcomeText.innerText = `Hello ${username?.toUpperCase()}, Welcome!`;
+
+  // Show transition effect
+  transition.classList.add("show");
+
+  // Save token
+  sessionStorage.setItem("token", data.user.token);
+
+  // Redirect after transition
+  setTimeout(() => {
+    window.location.href = "memotrial.html";
+  }, 2200); // matches transition duration
+}
+ else {
       errorMessage.innerText = data.message || "Invalid credentials.";
       setTimeout(() => {
         errorMessage.innerText = "";
