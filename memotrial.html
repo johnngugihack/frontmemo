@@ -12,6 +12,31 @@
       margin: 0;
       padding: 0;
     }
+.logout-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 44px;
+  color: yellow;
+  background-color: rgba(0, 0, 0, 0.8); /* semi-transparent dark background */
+  padding: 20px 40px;
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.logout-message.show {
+  opacity: 1;
+}
+
+body.fade-out {
+  background-color: #000; /* ensure background is dark */
+  opacity: 0;
+  transition: opacity 1.5s ease, background-color 0.5s ease;
+}
 
 h1, h2 {
   color: black;
@@ -494,6 +519,9 @@ button:disabled {
 
   <i class="fa fa-bars menu-icon" id="menuToggle"></i>
  
+<button onclick="logoutWithFade()" style="text-align: center;">
+  <strong>LOGOUT</strong>
+</button>
 
   <!-- Sidebar -->
 <div class="sidebar" id="sidebarMenu">
@@ -599,6 +627,25 @@ function getRoleFromToken(token) {
   } catch (e) {
     return null;
   }
+}
+//transition for logging out
+function logoutWithFade() {
+  const message = document.createElement('div');
+  message.className = 'logout-message';
+  message.textContent = 'Logging out... Bye 👋';
+
+  document.body.appendChild(message);
+
+  // Trigger fade
+  setTimeout(() => {
+    message.classList.add('show');
+    document.body.classList.add('fade-out');
+  }, 200); // slight delay to allow DOM paint
+
+  // Redirect after fade-out
+  setTimeout(() => {
+    window.location.href = 'index.html';
+  }, 1600); // must be longer than CSS transition duration
 }
 
 const token = sessionStorage.getItem('token');
